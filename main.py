@@ -8,9 +8,9 @@ from IPython.display import clear_output
 env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=True, render_mode="human")
 
 # Parámetros del Q-learning optimizados
-alpha = 0.1  # Tasa de aprendizaje reducida para mayor estabilidad
-gamma = 0.99  # Factor de descuento aumentado para valorar más las recompensas futuras
-epsilon = 1.0  # Tasa de exploración inicial
+alpha = 0.2  # Tasa de aprendizaje 
+gamma = 0.999  # Factor de descuento aumentado para valorar más las recompensas futuras
+epsilon = 0.9  # Tasa de exploración inicial
 epsilon_min = 0.01
 epsilon_decay = 0.995
 
@@ -18,8 +18,8 @@ epsilon_decay = 0.995
 Q = np.random.uniform(low=0, high=0.1, size=(env.observation_space.n, env.action_space.n))
 
 # Parámetros de entrenamiento ajustados
-num_episodes = 5000  # Reducido a 5000 episodios
-max_steps = 100  # Mantenemos 100 pasos máximos por episodio
+num_episodes = 5000  
+max_steps = 100  
 
 # Listas para seguimiento
 rewards = []
@@ -124,22 +124,46 @@ def test_agent(env, Q, num_episodes=5):
     print(f"Pasos promedio: {avg_steps:.2f}")
     return success_rate
 
-# Graficar resultados
-plt.figure(figsize=(12, 4))
-plt.subplot(1, 2, 1)
+
+plt.figure(figsize=(10,6))  
+
+# Gráficas de métricas
+plt.subplot(2, 2, 1)
 plt.plot(np.convolve(rewards, np.ones(100)/100, mode='valid'))
-plt.title('Recompensa Promedio (Media Móvil 100 episodios)')
+plt.title('Recompensa Promedio (Últimos 100 episodios)')
 plt.xlabel('Episodio')
 plt.ylabel('Recompensa')
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 2, 2)
 plt.plot(np.convolve(steps_per_episode, np.ones(100)/100, mode='valid'))
-plt.title('Pasos Promedio (Media Móvil 100 episodios)')
+plt.title('Pasos Promedio (Últimos 100 episodios)')
 plt.xlabel('Episodio')
 plt.ylabel('Pasos')
+
+# Crear una figura separada para la política y centrarla
+plt.figure(figsize=(8, 6)) 
+
+policy = np.argmax(Q, axis=1).reshape(4, 4)
+plt.imshow(policy, cmap='viridis')
+plt.colorbar(ticks=[0, 1, 2, 3], label='Acción (0=Izq, 1=Abajo, 2=Der, 3=Arriba)')
+plt.title('Política aprendida', fontsize=16)
+
+# Añadir flechas para mejor visualización
+for i in range(4):
+    for j in range(4):
+        action = policy[i, j]
+        arrow = ['←', '↓', '→', '↑'][action]
+        plt.text(j, i, arrow, ha='center', va='center', color='white', 
+                fontsize=24, fontweight='bold') 
+
 plt.tight_layout()
-plt.savefig('learning_progress.png')
-print("Gráfico guardado como 'learning_progress.png'")
+plt.savefig('policy_map.png')  
+print("Mapa de política guardado como 'policy_map.png'")
+
+plt.figure(1)  
+plt.tight_layout()
+plt.savefig('learning_metrics.png')
+print("Métricas de aprendizaje guardadas como 'learning_metrics.png'")
 
 # Probar el agente entrenado
 success_rate = test_agent(env, Q)
