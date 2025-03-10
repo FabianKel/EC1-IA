@@ -3,9 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from IPython.display import clear_output
+from generate_map import generate_random_map, plot_map
+
+
+
+random_map = generate_random_map(4)
+plot_map(random_map)
 
 # Crear el entorno Frozen Lake con slippery=True
-env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=True, render_mode="human")
+env = gym.make('FrozenLake-v1', desc=random_map, is_slippery=True, render_mode="human")
 
 # Parámetros del Q-learning optimizados
 alpha = 0.2  # Tasa de aprendizaje 
@@ -28,7 +34,7 @@ success_count = 0
 last_100_rewards = []
 
 # Entrenamiento del agente (utilizamos un entorno sin renderizar para acelerar el entrenamiento)
-train_env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=True)
+train_env = gym.make('FrozenLake-v1', desc=random_map, is_slippery=True)
 
 print("Iniciando entrenamiento...")
 for episode in range(num_episodes):
